@@ -22,7 +22,7 @@ markdownView.addEventListener("keyup", event => {
 
 openFileButton.addEventListener("click", () => {
   //   alert("bar horing");
-  mainProcess.getFileFromUserSelection();
+  mainProcess.openFile();
 });
 
 ipcRenderer.on("file-opened", (event, file, content) => {
