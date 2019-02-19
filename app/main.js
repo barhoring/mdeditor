@@ -17,7 +17,9 @@ const getFileFromUserSelection = (exports.getFileFromUserSelection = () => {
   const file = files[0];
   const content = fs.readFileSync(file).toString();
 
-  console.log(content);
+  mainWindow.webContents.send("file-opened", file, content);
+
+  // console.log(content);
 });
 
 app.on("ready", () => {
