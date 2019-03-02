@@ -3,6 +3,9 @@ const { remote, ipcRenderer } = require("electron");
 const mainProcess = remote.require("./main.js");
 const currentWindow = remote.getCurrentWindow();
 
+let filePath = null;
+let originalContent = "";
+
 const markdownView = document.querySelector("#markdown");
 const htmlView = document.querySelector("#html");
 const newFileButton = document.querySelector("#new-file");
@@ -15,14 +18,24 @@ const renderMarkdownToHtml = markdown => {
   htmlView.innerHTML = marked(markdown, { sanitize: true });
 };
 
+const updateEditedState = isEdited => {
+  currentWindow.setEdited(isEdited);
+
+  let title = "Fire Sale";
+  if (filePath) title = `${filePath} - FireSale`;
+  if (isEdited) title = `${title} - (Edited)`;
+
+  currentWindow.setTitle(title);
+};
+
 markdownView.addEventListener("keyup", event => {
-  console.log(event);
-  console.log(event.target);
-  renderMarkdownToHtml(event.target.value);
+  const currentContent = event.target.value;
+  renderMarkdownToHtml(currentContent);
+  updateEditedState(currentContent !== originalContent);
+  // currentWindow.setEdited(currentContent !== originalContent);
 });
 
 openFileButton.addEventListener("click", () => {
-  //   alert("bar horing");
   mainProcess.openFile(currentWindow);
 });
 
@@ -31,6 +44,12 @@ newFileButton.addEventListener("click", () => {
 });
 
 ipcRenderer.on("file-opened", (event, file, content) => {
+  filePath = file;
+  originalContent = content;
+
   markdownView.value = content;
   renderMarkdownToHtml(content);
+
+  // when opening new  file set the edited to false
+  updateEditedState(false);
 });
